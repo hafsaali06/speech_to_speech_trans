@@ -26,45 +26,54 @@
   //  </option>
   //  ));
 //  };
-// app.js code
+
+
+
+
+
+
 import React, { useState, useEffect } from 'react';
-// import { pipeline } from '@xenova/transformers';
+import axios from 'axios';
 
 function App() {
   const [voices, setVoices] = useState([]);
   const [selectedVoice, setSelectedVoice] = useState('');
   const [text, setText] = useState('');
   const [audioUrl, setAudioUrl] = useState('');
-  // const [translation, setTranslation] = useState('');
+  const [translation, setTranslation] = useState('');
 
   useEffect(() => {
     fetch('http://localhost:5000/api/voices')
       .then(response => response.json())
       .then(data => {
+        console.log(data); // Add this line to check the format of the data
         setVoices(Object.values(data));
       })
       .catch(error => console.error('Error fetching voices:', error));
   }, []);
 
   const convertTextToSpeech = () => {
-    fetch('http://localhost:5000/api/tts', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        voice: selectedVoice,
-        text: text
-      })
+    axios.post('http://localhost:5000/api/tts', {
+      voice: selectedVoice,
+      text: text
     })
-    .then(response => response.blob())
-    .then(blob => {
-      const audioUrl = URL.createObjectURL(blob);
+   .then(response => {
+      const audioUrl = URL.createObjectURL(response.data);
       setAudioUrl(audioUrl);
     })
-    .catch(error => console.error('Error converting text to speech:', error));
+   .catch(error => console.error('Error converting text to speech:', error));
   };
- 
+
+  const translateText = () => {
+    axios.post('http://localhost:5000/api/translate-and-speak', {
+      text: text,
+      target_language: 'en'
+    })
+   .then(response => {
+      setTranslation(response.data);
+    })
+   .catch(error => console.error('Error translating text:', error));
+  };
 
   return (
     <div>
@@ -85,20 +94,134 @@ function App() {
       </div>
       <div>
         <button onClick={convertTextToSpeech}>Convert to Speech</button>
-        {/* <button onClick={translateText}>Translate</button> */}
+        <button onClick={translateText}>Translate</button>
       </div>
       {audioUrl && <audio src={audioUrl} controls />}
-      {/* {translation && (
+      {translation && (
         <div>
           <h3>Translation:</h3>
           <p>{translation}</p>
         </div>
-      )} */}
+      )}
     </div>
   );
 }
 
 export default App;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// // app.js code
+// import React, { useState, useEffect } from 'react';
+// // import { pipeline } from '@xenova/transformers';
+
+// function App() {
+//   const [voices, setVoices] = useState([]);
+//   const [selectedVoice, setSelectedVoice] = useState('');
+//   const [text, setText] = useState('');
+//   const [audioUrl, setAudioUrl] = useState('');
+//   // const [translation, setTranslation] = useState('');
+
+//   useEffect(() => {
+//     fetch('http://localhost:5000/api/voices')
+//       .then(response => response.json())
+//       .then(data => {
+//         setVoices(Object.values(data));
+//       })
+//       .catch(error => console.error('Error fetching voices:', error));
+//   }, []);
+
+//   const convertTextToSpeech = () => {
+//     fetch('http://localhost:5000/api/tts', {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json'
+//       },
+//       body: JSON.stringify({
+//         voice: selectedVoice,
+//         text: text
+//       })
+//     })
+//     .then(response => response.blob())
+//     .then(blob => {
+//       const audioUrl = URL.createObjectURL(blob);
+//       setAudioUrl(audioUrl);
+//     })
+//     .catch(error => console.error('Error converting text to speech:', error));
+//   };
+ 
+
+//   return (
+//     <div>
+//       <h1>OpenTTS Web App</h1>
+//       <div>
+//         <label htmlFor="voice">Select Voice:</label>
+//         <select id="voice" value={selectedVoice} onChange={e => setSelectedVoice(e.target.value)}>
+//           <option value="">Select...</option>
+//           {voices.map(voice => (
+//             <option key={voice.id} value={voice.id}>{voice.name}</option>
+//           ))}
+//         </select>
+//       </div>
+//       <div>
+//         <label htmlFor="text">Enter Text:</label>
+//         <input type="text" id="text" value={text} onChange={e => setText(e.target.value)} />
+//         <p>{text}</p>
+//       </div>
+//       <div>
+//         <button onClick={convertTextToSpeech}>Convert to Speech</button>
+//         {/* <button onClick={translateText}>Translate</button> */}
+//       </div>
+//       {audioUrl && <audio src={audioUrl} controls />}
+//       {/* {translation && (
+//         <div>
+//           <h3>Translation:</h3>
+//           <p>{translation}</p>
+//         </div>
+//       )} */}
+//     </div>
+//   );
+// }
+
+// export default App;
 
 
 
